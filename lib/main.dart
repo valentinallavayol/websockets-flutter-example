@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:message_repository/message_repository.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:websockets_example/testFeature/bloc/message_cubit.dart';
-import 'package:websockets_example/testFeature/view/my_app.dart';
+import 'package:websockets_example/app/view/app.dart';
+import 'package:websockets_example/chat/bloc/chat_cubit.dart';
 
 import 'bootstrap.dart';
 
