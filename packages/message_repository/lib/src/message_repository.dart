@@ -1,9 +1,7 @@
 import 'dart:convert';
 
-import 'package:server/models/message.dart' as serverMessage;
+import 'package:message_repository/message_repository.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-
-import 'models/message.dart';
 
 /// {@template message_repository}
 /// A Very Good Project created by Very Good CLI.
@@ -16,24 +14,32 @@ class MessageRepository {
 
   final WebSocketChannel _webSocketChannel;
 
+  void startedTyping(String username) {
+    final newMessage = Message('', username, MessageType.startedTyping);
+
+    _webSocketChannel.sink.add(jsonEncode(newMessage.toJson()));
+  }
+
+  void finishedTyping(String username) {
+    final newMessage = Message('', username, MessageType.stoppedTyping);
+
+    _webSocketChannel.sink.add(jsonEncode(newMessage.toJson()));
+  }
+
   void addMessage(String message, String username) {
-    final newMessage = Message(message, username);
+    final newMessage = Message(message, username, MessageType.text);
 
     _webSocketChannel.sink.add(jsonEncode(newMessage.toJson()));
   }
 
   Stream<Message> messages() async* {
     await for (final message in _webSocketChannel.stream) {
-      final decodedMessage = serverMessage.Message.fromJson(
+      final decodedMessage = Message.fromJson(
         jsonDecode(message as String) as Map<String, dynamic>,
       );
 
-      final transformedMessage = Message(
-        decodedMessage.message,
-        decodedMessage.username,
-      );
-      print("ME LLEGO AL REPO $transformedMessage");
-      yield* Stream.value(transformedMessage);
+      print("ME LLEGO AL REPO $decodedMessage");
+      yield* Stream.value(decodedMessage);
     }
   }
 }
