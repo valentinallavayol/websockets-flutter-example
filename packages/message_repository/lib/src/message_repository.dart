@@ -26,6 +26,12 @@ class MessageRepository {
     _webSocketChannel.sink.add(jsonEncode(newMessage.toJson()));
   }
 
+  void stablishConnection(String username) {
+    final newMessage = Message('', username, MessageType.connectionStablished);
+
+    _webSocketChannel.sink.add(jsonEncode(newMessage.toJson()));
+  }
+
   void addMessage(String message, String username) {
     final newMessage = Message(message, username, MessageType.text);
 

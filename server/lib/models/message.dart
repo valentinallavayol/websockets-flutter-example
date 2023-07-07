@@ -24,4 +24,16 @@ class Message {
       'type': type.name,
     };
   }
+
+  Message copyWith({
+    String? message,
+    String? username,
+    MessageType? type,
+  }) {
+    return Message(
+      message ?? this.message,
+      username ?? this.username,
+      type ?? this.type,
+    );
+  }
 }

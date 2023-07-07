@@ -14,27 +14,20 @@ class ChatCubit extends Cubit<ChatState> {
         super(const ChatState(messages: [])) {
     setUserId();
     _streamSubscription = _messageRepository.messages().listen((message) {
-      print("ME LLEGO Al CUBIT $message");
-
-      final messages = [...state.messages];
-
-      if ((message.type == MessageType.text ||
-              message.type == MessageType.stoppedTyping) &&
-          message.username != state.username) {
-        messages.removeLast();
-      }
-
-      if (message.type == MessageType.stoppedTyping) {
-        emit(
-          state.copyWith(messages: messages),
-        );
-      } else {
-        emit(
-          state.copyWith(messages: [
-            ...messages,
-            message,
-          ]),
-        );
+      switch (message.type) {
+        case MessageType.startedTyping:
+          emit(state.copyWith(usersTyping: state.usersTyping + 1));
+        case MessageType.stoppedTyping:
+          emit(state.copyWith(usersTyping: state.usersTyping - 1));
+        case MessageType.text:
+          emit(
+            state.copyWith(
+                messages: [...(state.messages), message],
+                usersTyping: (message.username == state.username)
+                    ? state.usersTyping
+                    : state.usersTyping - 1),
+          );
+        default:
       }
     });
   }
@@ -43,6 +36,8 @@ class ChatCubit extends Cubit<ChatState> {
   late StreamSubscription _streamSubscription;
 
   void setUserId() {
+    final username = _generateRandomString(5);
+    _messageRepository.stablishConnection(username);
     emit(state.copyWith(username: _generateRandomString(5)));
   }
 

@@ -39,6 +39,7 @@ class _ChatTextFieldState extends State<ChatTextField> {
                   controller: _controller,
                   decoration: const InputDecoration(
                       border: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black),
                           borderRadius: BorderRadius.all(Radius.circular(10))),
                       labelText: 'Send a message'),
                   onChanged: (value) =>

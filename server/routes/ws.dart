@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:dart_frog/dart_frog.dart';
@@ -7,8 +8,9 @@ import 'package:server/models/message.dart';
 
 List<dynamic> clients = <dynamic>[];
 
-Handler get onRequest {
-  return webSocketHandler((channel, protocol) {
+FutureOr<Response> onRequest(RequestContext context) {
+  print(context.request.connectionInfo.remoteAddress);
+  final handler = webSocketHandler((channel, protocol) {
     print('connected');
 
     clients.add(channel);
@@ -50,18 +52,21 @@ Handler get onRequest {
 
     // Send a message back to the client.
   });
+
+  return handler(context);
 }
 
 void _handleMessage(WebSocketChannel senderChannel, Message message) {
   switch (message.type) {
     case MessageType.text:
-      print("Message from server side TEXT" + message.message);
       _handleTextMessage(message);
       break;
     case MessageType.startedTyping:
     case MessageType.stoppedTyping:
-      print("Message from server side TYPING " + message.message);
       _handleTypingMessage(senderChannel, message);
+      break;
+    case MessageType.connectionStablished:
+      _handleNewConnection(senderChannel, message);
       break;
     default:
   }
@@ -77,5 +82,14 @@ void _handleTypingMessage(WebSocketChannel senderChannel, Message message) {
   final otherClients = clients.where((channel) => channel != senderChannel);
   for (final client in otherClients) {
     client.sink.add(jsonEncode(message.toJson()));
+  }
+}
+
+void _handleNewConnection(WebSocketChannel senderChannel, Message message) {
+  final otherClients = clients.where((channel) => channel != senderChannel);
+  final joinedMessage =
+      message.copyWith(message: '${message.username} joined the chat!');
+  for (final client in otherClients) {
+    client.sink.add(jsonEncode(joinedMessage.toJson()));
   }
 }
